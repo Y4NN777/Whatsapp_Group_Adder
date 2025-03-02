@@ -93,10 +93,7 @@ async function getWhatsAppUsername(driver, phoneNumber) {
     let username = "Unknown";
 
     try {
-        // Wait for the chat window to load
-        await driver.sleep(3000);
-
-        // Ensure chat header is fully loaded before interacting
+        // Ensure the chat window is fully loaded
         await driver.wait(
             until.elementLocated(By.css("header")),
             5000
@@ -117,51 +114,47 @@ async function getWhatsAppUsername(driver, phoneNumber) {
 
         // Ensure the chat window is active
         try {
-            // Select the active chat window by ensuring it's focused (check for active class or elements)
+            // Wait for the active chat window
             let activeChatWindow = await driver.wait(
                 until.elementLocated(By.css(".x1n2onr6.xfo81ep.x9f619.x78zum5.x6s0dn4.xh8yej3.x7j6532.x1pl83jw.x1j6awrg.x1te75w5")),
                 5000
             );
-            await activeChatWindow.click();  // Ensure the chat window is active
+            await activeChatWindow.click();  // Focus on the chat window
 
-            // Wait for the specific Menu button in the chat window
+            // Open the chat menu
             let chatMenu = await driver.wait(
                 until.elementLocated(By.css('button[aria-label="Menu"]')),
                 5000
             );
             await chatMenu.click();
-            await driver.sleep(2000); // Allow the menu to open
-
-            // Locate and click the "Contact Info" option
+            
+            // Wait for the contact info option
             let contactInfo = await driver.wait(
                 until.elementLocated(By.css("div[aria-label='Contact info']")),
                 5000
             );
             await contactInfo.click();
-            await driver.sleep(3000);  // Allow the contact info panel to load
-
-            // Locate the username in the profile section using the correct selector
-            let profileName = await driver.wait(
+            await driver.wait(
                 until.elementLocated(By.css("span.x1rg5ohu.x13faqbe._ao3e.selectable-text.copyable-text")),
                 5000
             );
+
+            // Extract the username from the profile section
+            let profileName = await driver.findElement(By.css("span.x1rg5ohu.x13faqbe._ao3e.selectable-text.copyable-text"));
             username = await profileName.getText();
             logger.info(`Extracted username from Contact Info: ${username}`);
 
-            // Close the contact info panel (Escape key)
+            // Close the profile panel using Escape key
             await driver.actions().sendKeys(Key.ESCAPE).perform();
         } catch (error) {
-            logger.warn(`Could not retrieve username from Contact Info for ${phoneNumber}.`);
+            logger.warn(`Could not retrieve username from Contact Info for ${phoneNumber}:`, error);
         }
-
     } catch (error) {
         logger.error(`Error fetching username for ${phoneNumber}:`, error);
     }
 
     return username;
 }
-
-
 
 
 // Core function
