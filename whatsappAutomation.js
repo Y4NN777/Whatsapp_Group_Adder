@@ -92,11 +92,12 @@ async function addToGroup(driver, groupName, phoneNumber) {
 // Get WhatsApp Username from Contact Info
 async function getWhatsAppUsername(driver, phoneNumber) {
     let username = "Unknown";
-    try {
-        // Wait for the chat to load
-        await driver.sleep(3000);  
 
-        // Try to fetch the username if it's already visible (saved contact)
+    try {
+        // Wait for the chat window to load
+        await driver.sleep(3000);
+
+        // Check if username is directly visible in the chat header
         try {
             let nameElement = await driver.wait(
                 until.elementLocated(By.css("span.x1rg5ohu.x13faqbe._ao3e.selectable-text.copyable-text")),
@@ -104,19 +105,19 @@ async function getWhatsAppUsername(driver, phoneNumber) {
             );
             username = await nameElement.getText();
             logger.info(`Username found in chat header: ${username}`);
+            return username;
         } catch (error) {
             logger.warn(`Username not found in chat header for ${phoneNumber}. Trying profile...`);
         }
 
-        // If username is not found, open the profile (three dots menu)
-        if (username === "Unknown") {
-            // Click on the three vertical dots to open contact options
+        // If username is not found, open the profile (chat window menu)
+        try {
             let threeDots = await driver.wait(
                 until.elementLocated(By.css("button[aria-label='Menu']")),
                 5000
             );
             await threeDots.click();
-            await driver.sleep(2000); // Let the menu open
+            await driver.sleep(2000); // Allow the menu to open
 
             // Locate and click the "Contact Info" option
             let contactInfo = await driver.wait(
@@ -124,9 +125,9 @@ async function getWhatsAppUsername(driver, phoneNumber) {
                 5000
             );
             await contactInfo.click();
-            await driver.sleep(2000);  // Wait for contact info panel to load
+            await driver.sleep(3000);  // Allow the contact info panel to load
 
-            // Now, try to locate the username in the profile
+            // Try to locate the username in the profile
             let profileName = await driver.wait(
                 until.elementLocated(By.css("span.x1rg5ohu.x13faqbe._ao3e.selectable-text.copyable-text")),
                 5000
@@ -134,16 +135,19 @@ async function getWhatsAppUsername(driver, phoneNumber) {
             username = await profileName.getText();
             logger.info(`Extracted username from Contact Info: ${username}`);
 
-            // Optionally, close the contact info panel by pressing the Escape key
+            // Close the contact info panel (Escape key)
             await driver.actions().sendKeys(Key.ESCAPE).perform();
+        } catch (error) {
+            logger.warn(`Could not retrieve username from Contact Info for ${phoneNumber}.`);
         }
 
-        return username;
     } catch (error) {
         logger.error(`Error fetching username for ${phoneNumber}:`, error);
-        return username;
     }
+
+    return username;
 }
+
 
 
 
