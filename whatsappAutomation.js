@@ -89,7 +89,6 @@ async function addToGroup(driver, groupName, phoneNumber) {
 }
 
 
-// Get WhatsApp Username from Contact Info
 async function getWhatsAppUsername(driver, phoneNumber) {
     let username = "Unknown";
 
@@ -106,7 +105,7 @@ async function getWhatsAppUsername(driver, phoneNumber) {
         // Try to find the username in the chat header
         try {
             let nameElement = await driver.wait(
-                until.elementLocated(By.css("span.x1rg5ohu.x13faqbe._aoe.selectable-text.copyable-text")),
+                until.elementLocated(By.css("span.x1rg5ohu.x13faqbe._ao3e.selectable-text.copyable-text")),
                 5000
             );
             username = await nameElement.getText();
@@ -141,9 +140,9 @@ async function getWhatsAppUsername(driver, phoneNumber) {
             await contactInfo.click();
             await driver.sleep(3000);  // Allow the contact info panel to load
 
-            // Try to locate the username in the profile
+            // Locate the username in the profile section using the correct selector
             let profileName = await driver.wait(
-                until.elementLocated(By.css("span.x1rg5ohu.x13faqbe._aoe.selectable-text.copyable-text")),
+                until.elementLocated(By.css("span.x1rg5ohu.x13faqbe._ao3e.selectable-text.copyable-text")),
                 5000
             );
             username = await profileName.getText();
