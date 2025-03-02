@@ -110,13 +110,19 @@ async function getWhatsAppUsername(driver, phoneNumber) {
             logger.warn(`Username not found in chat header for ${phoneNumber}. Trying profile...`);
         }
 
-        // If username is not found, open the profile (chat window menu)
+        // Ensure chat is open before trying to locate the menu
+        await driver.wait(
+            until.elementLocated(By.css("header")),
+            5000
+        );
+
+        // Now click the correct chat header menu (not the main one)
         try {
-            let threeDots = await driver.wait(
-                until.elementLocated(By.css("button[aria-label='Menu']")),
+            let chatMenu = await driver.wait(
+                until.elementLocated(By.css("header button[aria-label='Menu']")),
                 5000
             );
-            await threeDots.click();
+            await chatMenu.click();
             await driver.sleep(2000); // Allow the menu to open
 
             // Locate and click the "Contact Info" option
@@ -147,6 +153,7 @@ async function getWhatsAppUsername(driver, phoneNumber) {
 
     return username;
 }
+
 
 
 
