@@ -97,10 +97,16 @@ async function getWhatsAppUsername(driver, phoneNumber) {
         // Wait for the chat window to load
         await driver.sleep(3000);
 
-        // Check if username is directly visible in the chat header
+        // Ensure chat header is fully loaded before interacting
+        await driver.wait(
+            until.elementLocated(By.css("header")),
+            5000
+        );
+
+        // Try to find the username in the chat header
         try {
             let nameElement = await driver.wait(
-                until.elementLocated(By.css("span.x1rg5ohu.x13faqbe._ao3e.selectable-text.copyable-text")),
+                until.elementLocated(By.css("span.x1rg5ohu.x13faqbe._aoe.selectable-text.copyable-text")),
                 5000
             );
             username = await nameElement.getText();
@@ -110,16 +116,18 @@ async function getWhatsAppUsername(driver, phoneNumber) {
             logger.warn(`Username not found in chat header for ${phoneNumber}. Trying profile...`);
         }
 
-        // Ensure chat is open before trying to locate the menu
-        await driver.wait(
-            until.elementLocated(By.css("header")),
-            5000
-        );
-
-        // Now click the correct chat header menu (not the main one)
+        // Ensure the chat window is active
         try {
+            // Select the active chat window by ensuring it's focused (check for active class or elements)
+            let activeChatWindow = await driver.wait(
+                until.elementLocated(By.css(".x1n2onr6.xfo81ep.x9f619.x78zum5.x6s0dn4.xh8yej3.x7j6532.x1pl83jw.x1j6awrg.x1te75w5")),
+                5000
+            );
+            await activeChatWindow.click();  // Ensure the chat window is active
+
+            // Wait for the specific Menu button in the chat window
             let chatMenu = await driver.wait(
-                until.elementLocated(By.css("header button[aria-label='Menu']")),
+                until.elementLocated(By.css('button[aria-label="Menu"]')),
                 5000
             );
             await chatMenu.click();
@@ -135,7 +143,7 @@ async function getWhatsAppUsername(driver, phoneNumber) {
 
             // Try to locate the username in the profile
             let profileName = await driver.wait(
-                until.elementLocated(By.css("span.x1rg5ohu.x13faqbe._ao3e.selectable-text.copyable-text")),
+                until.elementLocated(By.css("span.x1rg5ohu.x13faqbe._aoe.selectable-text.copyable-text")),
                 5000
             );
             username = await profileName.getText();
@@ -153,7 +161,6 @@ async function getWhatsAppUsername(driver, phoneNumber) {
 
     return username;
 }
-
 
 
 
